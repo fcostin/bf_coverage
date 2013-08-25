@@ -1,6 +1,9 @@
 import argparse
 from cStringIO import StringIO
 from string import Template as T
+import os
+
+from common import KNOWN_OPS, read_source, make_hash
 
 
 BF_BASE = {
@@ -78,6 +81,9 @@ cov_mask[${src_line}] = 1;
 
     'program_end' : T(r"""
 FILE *cov_f = fopen("coverage.dat", "w");
+fprintf(cov_f, "%s\n", "${source_file_name}");
+fprintf(cov_f, "%s\n", "${source_file_hash}");
+fprintf(cov_f, "%d\n", ${program_size});
 fwrite((void*)cov_mask, (size_t)1, (size_t)${program_size}, cov_f);
 fclose(cov_f);
     """),
@@ -85,9 +91,11 @@ fclose(cov_f);
 
 
 class Gen():
-    def __init__(self, buffer_size, program_size, templates, out):
+    def __init__(self, buffer_size, program_size, source_file_name, source_file_hash, templates, out):
         self.buffer_size = buffer_size
         self.program_size = program_size
+        self.source_file_name = source_file_name
+        self.source_file_hash = source_file_hash
         self.templates = templates
         self.out = out
 
@@ -99,6 +107,8 @@ class Gen():
         t = {
             'program_size' : self.program_size,
             'buffer_size' : self.buffer_size,
+            'source_file_name' : self.source_file_name,
+            'source_file_hash' : self.source_file_hash,
         }
         if src_line is not None:
             t['src_line'] = str(src_line)
@@ -118,15 +128,16 @@ class GenGen():
             g.emit_op(op, src_line)
 
 
-def make_master_gen(buffer_size, program_size, out):
-    base_gen = Gen(buffer_size, program_size, BF_BASE, out)
-    interp_gen = Gen(buffer_size, program_size, BF_INTERP, out)
-    cov_gen = Gen(buffer_size, program_size, BF_COV, out)
-    return GenGen([base_gen, interp_gen, cov_gen])
+def make_master_gen(buffer_size, program_size, source_file_name, source_file_hash, out):
+    ts = [BF_BASE, BF_INTERP, BF_COV]
+    gens = []
+    for t in ts:
+        gen = Gen(buffer_size, program_size, source_file_name, source_file_hash, t, out)
+        gens.append(gen)
+    return GenGen(gens)
 
 
 def compile(s, g):
-    KNOWN_OPS = '<>+-[].,'
     g.emit_op('include')
     g.emit_op('program_begin')
     for i, c in enumerate(s):
@@ -144,16 +155,16 @@ def parse_args():
     return p.parse_args()
 
 
-def read_source(file_name):
-    with open(file_name, 'r') as f:
-        source = f.read()
-    return source
-
 if __name__ == '__main__':
     args = parse_args()
     source = read_source(args.source)
     out = StringIO()
-    gen = make_master_gen(buffer_size = args.buffer_size, program_size = len(source), out=out)
+    gen = make_master_gen(
+        buffer_size=args.buffer_size,
+        program_size=len(source),
+        source_file_name=os.path.abspath(args.source),
+        source_file_hash=make_hash(source),
+        out=out)
     compile(source, gen)
     print out.getvalue()
 
