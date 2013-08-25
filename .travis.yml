@@ -1,0 +1,11 @@
+language: python
+python:
+  - "2.7"
+install:
+    - pip install coveralls --use-mirrors
+compiler:
+    - gcc
+script:
+    - make && make test
+after_success:
+    - find . -iname coverage.dat | xargs python ./tools/bf_cov.py
