@@ -1,3 +1,11 @@
+"""
+bf_cov
+
+collate & publish bf coverage data to coveralls.io
+
+uses https://github.com/coagulant/coveralls-python
+"""
+
 import argparse
 import struct
 from collections import namedtuple

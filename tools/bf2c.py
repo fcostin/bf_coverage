@@ -1,3 +1,11 @@
+"""
+bf to c compiler
+
+resulting program will be built to collect coverage data
+when run. (coverage data measures which ops in the bf
+source get run)
+"""
+
 import argparse
 from cStringIO import StringIO
 from string import Template as T
