@@ -118,6 +118,7 @@ if __name__ == '__main__':
 
     data_by_key = {}
     for cov_file_name in args.coverage_files:
+        log.debug('reading coverage file "%s"' % cov_file_name)
         cov_file = read_coverage_file(cov_file_name)
         key, data = make_coveralls_style_data(cov_file)
         if key not in data_by_key:
@@ -128,13 +129,15 @@ if __name__ == '__main__':
     data = data_by_key.values()
     data = sorted(data, key = lambda d : d['name'])
 
+    log.debug('collected coverage data for %d source file(s)' % len(data))
+
     # postprocess file names so they are relative to root
     for d in data:
         d['name'] = os.path.relpath(d['name'], root)
-        logging.debug('got coverage data for "%s"' % d['name'])
+        n_cov = sum(1 for x in d['coverage'] if x > 0)
+        n_tot = len(d['coverage'])
+        log.debug('source file "%s" has %.1f %% coverage' % (d['name'], (100.0*n_cov)/n_tot))
 
-    logging.debug('submitting coverage data via coveralls...')
     coveralls = BfCoveralls(data)
     coveralls.wear(args.dry_run)
-    logging.debug('fin.')
 
