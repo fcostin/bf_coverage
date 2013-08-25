@@ -98,6 +98,7 @@ def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument('coverage_files', nargs='*', metavar='FILE')
     p.add_argument('--root', dest='root', metavar='REPO_ROOT')
+    p.add_argument('--dry-run', dest='dry_run', default=False, action='store_true')
     return p.parse_args()
 
 
@@ -133,7 +134,7 @@ if __name__ == '__main__':
         logging.debug('got coverage data for "%s"' % d['name'])
 
     logging.debug('submitting coverage data via coveralls...')
-    coveralls = BfCoveralls()
-    coveralls.wear()
+    coveralls = BfCoveralls(data)
+    coveralls.wear(args.dry_run)
     logging.debug('fin.')
 
