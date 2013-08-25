@@ -3,7 +3,7 @@
 
 #### status
 
-[![Build Status](https://travis-ci.org/fcostin/bf_coverage.png)](https://travis-ci.org/fcostin/bf_coverage.png)   [![Coverage Status](https://coveralls.io/repos/fcostin/bf_coverage/badge.png?branch=master)](https://coveralls.io/r/fcostin/bf_coverage?branch=master)
+[![Build Status](https://travis-ci.org/fcostin/bf_coverage.png)](https://travis-ci.org/fcostin/bf_coverage)   [![Coverage Status](https://coveralls.io/repos/fcostin/bf_coverage/badge.png?branch=master)](https://coveralls.io/r/fcostin/bf_coverage?branch=master)
 
 
 what?
